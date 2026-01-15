@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CastEx{% endblock %}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 { color: #2c3e50; }
+        a { color: #3498db; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .search-form {
+            margin: 20px 0;
+        }
+        .search-form input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        .search-form input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .search-form button {
+            margin-top: 10px;
+            padding: 12px 24px;
+            font-size: 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .search-form button:hover {
+            background: #2980b9;
+        }
+        .episode-list {
+            list-style: none;
+            padding: 0;
+        }
+        .episode-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .episode-item:last-child {
+            border-bottom: none;
+        }
+        .episode-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .episode-meta {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .episode-description {
+            margin-top: 10px;
+            color: #555;
+        }
+        .categories {
+            margin-top: 10px;
+        }
+        .category-tag {
+            display: inline-block;
+            background: #ecf0f1;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .no-results {
+            padding: 20px;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="/">CastEx</a></h1>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <!-- TODO: Add JavaScript for real-time search -->
+</body>
+</html>

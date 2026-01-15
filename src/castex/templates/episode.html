@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ episode.title }} - CastEx{% endblock %}
+
+{% block content %}
+<article>
+    <h2>{{ episode.title }}</h2>
+
+    <div class="episode-meta">
+        <strong>Broadcast:</strong> {{ episode.broadcast_date.strftime('%d %B %Y') }}
+    </div>
+
+    {% if episode.contributors %}
+    <div style="margin-top: 15px;">
+        <strong>Contributors:</strong>
+        <ul>
+        {% for contributor in episode.contributors %}
+            <li>{{ contributor }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if episode.description %}
+    <div style="margin-top: 15px;">
+        <strong>Description:</strong>
+        <p>{{ episode.description }}</p>
+    </div>
+    {% endif %}
+
+    {% if episode.categories %}
+    <div class="categories" style="margin-top: 15px;">
+        <strong>Categories:</strong><br>
+        {% for cat in episode.categories %}
+        <span class="category-tag">{{ cat }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 20px;">
+        <a href="{{ episode.source_url }}" target="_blank">Listen on BBC Sounds</a>
+        {% if episode.braggoscope_url %}
+        &middot; <a href="{{ episode.braggoscope_url }}" target="_blank">View on Braggoscope</a>
+        {% endif %}
+    </div>
+</article>
+
+<p style="margin-top: 30px;">
+    <a href="/">&larr; Back to search</a>
+</p>
+{% endblock %}

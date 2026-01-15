@@ -13,7 +13,7 @@ class SearchIndex:
     def __init__(self, episodes: list[Episode]) -> None:
         """Create a search index from a list of episodes."""
         self._episodes = {ep.id: ep for ep in episodes}
-        self._conn = sqlite3.connect(":memory:")
+        self._conn = sqlite3.connect(":memory:", check_same_thread=False)
         self._build_index(episodes)
 
     def _build_index(self, episodes: list[Episode]) -> None:

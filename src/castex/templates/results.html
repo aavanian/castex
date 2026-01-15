@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Search: {{ query }} - CastEx{% endblock %}
+
+{% block content %}
+<form class="search-form" action="/search" method="get">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search episodes...">
+    <button type="submit">Search</button>
+</form>
+
+{% if episodes %}
+<p>Found {{ episodes|length }} result{% if episodes|length != 1 %}s{% endif %} for "{{ query }}"</p>
+
+<ul class="episode-list">
+{% for episode in episodes %}
+<li class="episode-item">
+    <a href="/episode/{{ episode.id }}" class="episode-title">{{ episode.title }}</a>
+    <div class="episode-meta">
+        {{ episode.broadcast_date.strftime('%d %B %Y') }}
+        {% if episode.contributors %}
+        &middot; {{ episode.contributors|join(', ') }}
+        {% endif %}
+    </div>
+    {% if episode.description %}
+    <div class="episode-description">{{ episode.description[:200] }}{% if episode.description|length > 200 %}...{% endif %}</div>
+    {% endif %}
+    {% if episode.categories %}
+    <div class="categories">
+        {% for cat in episode.categories %}
+        <span class="category-tag">{{ cat }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+</li>
+{% endfor %}
+</ul>
+{% else %}
+<div class="no-results">
+    No episodes found for "{{ query }}"
+</div>
+{% endif %}
+{% endblock %}

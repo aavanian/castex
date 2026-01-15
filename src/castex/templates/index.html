@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}CastEx - Podcast Episode Search{% endblock %}
+
+{% block content %}
+<p>Search through podcast episodes by title, description, contributors, or categories.</p>
+
+<form class="search-form" action="/search" method="get">
+    <input type="text" name="q" placeholder="Search episodes..." autofocus>
+    <button type="submit">Search</button>
+</form>
+{% endblock %}
