@@ -21,7 +21,7 @@ Era: Ancient, Classical, Medieval, Renaissance, Early Modern, Enlightenment, 19t
 
 Region: Britain, Ireland, France, Germany, Italy, Greece, Rome, Spain, Netherlands, Scandinavia, Eastern Europe, Russia, Middle East, Persia, India, China, Japan, Africa, Americas
 
-Return only a JSON array of tag strings, e.g. ["History", "Medieval", "France"]"""
+Return only a JSON array of tag strings, e.g. ["History", "Medieval", "France"]. No need to embed in markdown."""
 
 
 async def classify_episode(

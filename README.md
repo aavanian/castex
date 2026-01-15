@@ -38,3 +38,25 @@ Environment variables:
 | `CASTEX_LLM_MODEL` | `llama3.2` | LLM model name |
 | `CASTEX_SERVER_HOST` | `0.0.0.0` | Server host |
 | `CASTEX_SERVER_PORT` | `8000` | Server port |
+
+## Deployment
+
+## Bugs
+  
+  * braggoscope urls are broken, they need the date: https://www.braggoscope.com/2011/01/27/$slug.html
+  * partial word search doesn't work (artisto has no results, artistotle has several)
+  * contributor formatting is wrong
+
+## Todos
+
+  * show the full description
+  * Styling
+  * Rich search: using +/- to include/exclude tags, use =/!= to include/exclude sources (recheck elfeed mini dsl to use the same)
+  * Real-time search
+  * Tooling to benchmark models for classification
+  * Script to only update classification without fetching episode info again
+  * Contributor pivot (click contributor to see all their episodes)
+  * Reading list extraction from BBC
+  * Multiple podcast sources
+  * Semantic/embedding search
+  * clickable tags
