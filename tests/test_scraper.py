@@ -3,6 +3,7 @@
 from datetime import date
 from pathlib import Path
 
+from castex.scraper.bbc import parse_bbc_html
 from castex.scraper.wikipedia import parse_wikipedia_html
 
 
@@ -46,3 +47,23 @@ def test_parse_wikipedia_html_malformed() -> None:
     </table>
     """
     assert parse_wikipedia_html(html) == []
+
+
+def test_parse_bbc_html(fixtures_dir: Path) -> None:
+    """Test parsing description from BBC episode page."""
+    html = (fixtures_dir / "bbc_episode_sample.html").read_text()
+
+    description = parse_bbc_html(html)
+
+    assert description == (
+        "Melvyn Bragg explores ideas that have influenced 20th century human rights and warfare."
+    )
+
+
+def test_parse_bbc_html_no_description() -> None:
+    """Test parsing handles missing description gracefully."""
+    html = "<html><head><title>Test</title></head><body></body></html>"
+
+    description = parse_bbc_html(html)
+
+    assert description is None
