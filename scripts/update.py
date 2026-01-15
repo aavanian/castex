@@ -107,7 +107,7 @@ async def main() -> None:
     logger.info("Loaded %d existing episodes", len(existing_episodes))
 
     async with httpx.AsyncClient(
-        headers={"User-Agent": "CastexBot/1.0 (podcast-archive)"},
+        headers={"User-Agent": "CastexBot/1.0 (https://github.com/aavanian/castex) httpx/0.28"},
         timeout=30.0,
         follow_redirects=True,
     ) as client:
