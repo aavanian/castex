@@ -1,24 +1,26 @@
-# Claude Code Prompt: In Our Time Archive Search
+# Claude Code Prompt: Curated Podcast Episode Search
 
 ## Project Overview
 
-Build a searchable archive for BBC Radio 4's "In Our Time" podcast. The system scrapes episode metadata from Wikipedia and BBC, classifies episodes using an LLM, and provides both a web interface and JSON API for search.
+Build a searchable archive for podcasts like BBC Radio 4's "In Our Time". The system scrapes episode metadata from Wikipedia and BBC, classifies episodes using an LLM, and provides both a web interface and JSON API for search.
+
+Additional podcasts will be added on a ad-hoc basis.
 
 ## Architecture
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
 │   Wikipedia     │────▶│   JSON files    │────▶│   FastAPI       │
-│   (episode      │     │   (episodes.json│     │   server        │
-│    list)        │     │    + index)     │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-        │                       ▲                    │
-        │ (new only)            │                    ├── GET / (search form)
-        ▼                       │                    ├── GET /search (HTML)
-┌─────────────────┐     ┌───────┴───────┐           ├── GET /api/search (JSON)
-│   BBC episode   │────▶│ LLM classifier │           └── GET /episode/{id}
-│   pages         │     │ (categories)   │
-└─────────────────┘     └───────────────┘
+│   (episode      │      │   (episodes.json│      │   server        │
+│    list)        │      │    + index)     │      │                 │
+└─────────────────┘      └─────────────────┘      └─────────────────┘
+        │                        ▲                    │
+        │ (new only)              │                    ├── GET / (search form)
+        ▼                        │                    ├── GET /search (HTML)
+┌─────────────────┐      ┌──-─────┴───────┐            ├── GET /api/search (JSON)
+│   BBC episode   │────▶│ LLM classifier │            └── GET /episode/{id}
+│   pages         │      │ (categories)   │
+└─────────────────┘      └───-────────────┘
 ```
 
 ## Tech Stack
@@ -42,7 +44,7 @@ class Episode:
     broadcast_date: date         # 2017-09-21
     contributors: list[str]      # ["Anne Smith (Oxford)", "John Doe (Cambridge)"]
     description: str | None      # Synopsis from BBC page
-    bbc_url: str                 # https://www.bbc.co.uk/programmes/b0xyz123
+    source_url: str                 # https://www.bbc.co.uk/programmes/b0xyz123
     categories: list[str]        # ["History", "Military", "Medieval", "Mediterranean"]
     braggoscope_url: str | None  # https://www.braggoscope.com/episode/...
 ```
@@ -62,11 +64,11 @@ The LLM should assign 3-7 tags per episode based on title and description.
 ## File Structure
 
 ```
-iot-archive/
+castex/
 ├── pyproject.toml
 ├── README.md
 ├── src/
-│   └── iot_archive/
+│   └── castex/
 │       ├── __init__.py
 │       ├── config.py          # Settings via environment variables
 │       ├── models.py          # Episode dataclass, type definitions
@@ -102,12 +104,12 @@ iot-archive/
 
 Environment variables (with defaults):
 ```
-IOT_DATA_DIR=./data
-IOT_LLM_BASE_URL=http://localhost:11434/v1  # Ollama default
-IOT_LLM_API_KEY=                            # Empty for Ollama
-IOT_LLM_MODEL=llama3.2
-IOT_SERVER_HOST=0.0.0.0
-IOT_SERVER_PORT=8000
+CASTEX_DATA_DIR=./data
+CASTEX_LLM_BASE_URL=http://localhost:11434/v1  # Ollama default
+CASTEX_LLM_API_KEY=                            # Empty for Ollama
+CASTEX_LLM_MODEL=llama3.2
+CASTEX_SERVER_HOST=0.0.0.0
+CASTEX_SERVER_PORT=8000
 ```
 
 ## Key Implementation Details
@@ -225,7 +227,7 @@ uv pip install -e ".[dev]"
 uv run pytest
 
 # Run server locally
-uv run python -m iot_archive.server
+uv run python -m castex.server
 
 # Run update (scrape new episodes)
 uv run python scripts/update.py
