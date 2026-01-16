@@ -29,6 +29,25 @@ def test_parse_wikipedia_html(fixtures_dir: Path) -> None:
     assert ep3["broadcast_date"] == date(2023, 9, 21)
 
 
+def test_parse_wikipedia_html_preserves_spaces_around_links(fixtures_dir: Path) -> None:
+    """Test that text around links is properly spaced."""
+    html = (fixtures_dir / "wikipedia_sample.html").read_text()
+
+    episodes = parse_wikipedia_html(html)
+
+    # Find the Aristocracy episode which has linked institution names
+    aristocracy = next(ep for ep in episodes if ep["title"] == "The Aristocracy")
+
+    # Check that spaces are preserved around linked text
+    contributor = aristocracy["contributors"][0]
+    assert "the University of London" in contributor, (
+        f"Missing space before 'University': {contributor}"
+    )
+    assert "London's Institute" in contributor, f"Missing space after 's: {contributor}"
+    assert "Research and author" in contributor, f"Missing space before 'and': {contributor}"
+    assert "of The Decline" in contributor, f"Missing space before 'The': {contributor}"
+
+
 def test_parse_wikipedia_html_malformed() -> None:
     """Test parsing handles malformed HTML gracefully."""
     # Empty table

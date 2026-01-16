@@ -42,8 +42,6 @@ Environment variables:
 ## Deployment
 
 ## Bugs
-  
-  * contributor formatting is wrong
 
 ## Todos
 

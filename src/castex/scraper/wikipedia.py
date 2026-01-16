@@ -93,19 +93,30 @@ def _parse_date(text: str) -> date | None:
     return date(year, month, day)
 
 
+def _normalize_text(text: str) -> str:
+    """Normalize whitespace and fix spacing around punctuation."""
+    # Collapse multiple spaces to single space
+    text = re.sub(r"\s+", " ", text)
+    # Remove space before punctuation (comma, period, semicolon, colon, apostrophe)
+    text = re.sub(r"\s+([,\.;:'])", r"\1", text)
+    return text.strip()
+
+
 def _parse_contributors(cell: Any) -> list[str]:
     """Parse contributors from the cell."""
     contributors: list[str] = []
 
     # Look for list items
     for li in cell.find_all("li"):
-        text = li.get_text(strip=True)
+        text = li.get_text(separator=" ", strip=True)
+        text = _normalize_text(text)
         if text:
             contributors.append(text)
 
     # If no list items, get the cell text directly
     if not contributors:
-        text = cell.get_text(strip=True)
+        text = cell.get_text(separator=" ", strip=True)
+        text = _normalize_text(text)
         if text:
             contributors.append(text)
 
