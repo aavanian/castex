@@ -95,3 +95,45 @@ def test_episode_not_found(client: TestClient) -> None:
     response = client.get("/episode/nonexistent")
 
     assert response.status_code == 404
+
+
+def test_search_api_includes_reading_list(tmp_path: Path) -> None:
+    """Test that API response includes reading_list."""
+    from unittest.mock import patch
+
+    from castex.storage import save_episodes
+
+    episodes = [
+        Episode(
+            id="emily-dickinson",
+            title="Emily Dickinson",
+            broadcast_date=date(2017, 5, 4),
+            contributors=["Fiona Green"],
+            description="American poet",
+            source_url="https://www.bbc.co.uk/programmes/b08p3jlw",
+            categories=["Literature"],
+            braggoscope_url=None,
+            reading_list=[
+                "Christopher Benfey, A Summer of Hummingbirds (Penguin Books, 2009)",
+            ],
+        ),
+    ]
+
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    save_episodes(episodes, data_dir)
+
+    with patch.dict("os.environ", {"CASTEX_DATA_DIR": str(data_dir)}):
+        from castex.server import create_app
+
+        app = create_app()
+        client = TestClient(app)
+
+        response = client.get("/api/search?q=Dickinson")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["results"]) == 1
+        assert data["results"][0]["reading_list"] == [
+            "Christopher Benfey, A Summer of Hummingbirds (Penguin Books, 2009)",
+        ]

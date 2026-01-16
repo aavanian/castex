@@ -27,6 +27,7 @@ class SearchIndex:
                 description,
                 contributors,
                 categories,
+                reading_list,
                 tokenize='trigram'
             )
         """)
@@ -34,8 +35,8 @@ class SearchIndex:
         for ep in episodes:
             cursor.execute(
                 """
-                INSERT INTO episodes_fts (id, title, description, contributors, categories)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO episodes_fts (id, title, description, contributors, categories, reading_list)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
                     ep.id,
@@ -43,6 +44,7 @@ class SearchIndex:
                     ep.description or "",
                     " ".join(ep.contributors),
                     " ".join(ep.categories),
+                    " ".join(ep.reading_list),
                 ),
             )
 

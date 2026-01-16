@@ -1,7 +1,7 @@
 """Episode data model and type definitions."""
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 
 
@@ -35,3 +35,4 @@ class Episode:
     source_url: str
     categories: list[str]
     braggoscope_url: str | None
+    reading_list: list[str] = field(default_factory=list)

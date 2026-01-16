@@ -69,20 +69,50 @@ def test_parse_wikipedia_html_malformed() -> None:
 
 
 def test_parse_bbc_html(fixtures_dir: Path) -> None:
-    """Test parsing description from BBC episode page."""
+    """Test parsing episode data from BBC episode page."""
     html = (fixtures_dir / "bbc_episode_sample.html").read_text()
 
-    description = parse_bbc_html(html)
+    result = parse_bbc_html(html)
 
-    assert description == (
+    expected_text = (
         "Melvyn Bragg explores ideas that have influenced 20th century human rights and warfare."
     )
+    assert result["short_description"] == expected_text
+    assert result["description"] == expected_text
+    assert result["contributors"] == []
+    assert result["reading_list"] == []
 
 
 def test_parse_bbc_html_no_description() -> None:
     """Test parsing handles missing description gracefully."""
     html = "<html><head><title>Test</title></head><body></body></html>"
 
-    description = parse_bbc_html(html)
+    result = parse_bbc_html(html)
 
-    assert description is None
+    assert result["short_description"] is None
+    assert result["description"] is None
+    assert result["contributors"] == []
+    assert result["reading_list"] == []
+
+
+def test_parse_bbc_html_new_format(fixtures_dir: Path) -> None:
+    """Test parsing new format with structured paragraphs."""
+    html = (fixtures_dir / "bbc_episode_new_format.html").read_text()
+
+    result = parse_bbc_html(html)
+
+    assert result["short_description"] == (
+        "Melvyn Bragg and guests discuss Emily Dickinson (1830-1886), celebrated American poet."
+    )
+    assert result["description"] == (
+        "Emily Dickinson was arguably the most startling and original poet in America in the C19th."
+    )
+    assert result["contributors"] == [
+        "Fiona Green Senior Lecturer in English at Cambridge",
+        "Linda Freedman Lecturer at University College London",
+        "Paraic Finnerty Reader at the University of Portsmouth",
+    ]
+    assert result["reading_list"] == [
+        "Christopher Benfey, A Summer of Hummingbirds (Penguin Books, 2009)",
+        "Judith Farr, The Gardens of Emily Dickinson (Harvard University Press, 2005)",
+    ]

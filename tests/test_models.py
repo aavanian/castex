@@ -78,3 +78,24 @@ def test_make_braggoscope_url_single_digit_date() -> None:
     """Test braggoscope URL with single-digit month and day are zero-padded."""
     url = make_braggoscope_url("platos-symposium", date(2005, 1, 6))
     assert url == "https://www.braggoscope.com/2005/01/06/platos-symposium.html"
+
+
+def test_episode_with_reading_list() -> None:
+    """Test Episode with reading_list field."""
+    reading_list = [
+        "Christopher Benfey, A Summer of Hummingbirds (Penguin Books, 2009)",
+        "Judith Farr, The Gardens of Emily Dickinson (Harvard University Press, 2005)",
+    ]
+    episode = Episode(
+        id="emily-dickinson",
+        title="Emily Dickinson",
+        broadcast_date=date(2017, 5, 4),
+        contributors=["Fiona Green", "Linda Freedman"],
+        description="Emily Dickinson was a startling poet.",
+        source_url="https://www.bbc.co.uk/programmes/b08p3jlw",
+        categories=["Literature", "Poetry", "American"],
+        braggoscope_url=None,
+        reading_list=reading_list,
+    )
+
+    assert episode.reading_list == reading_list

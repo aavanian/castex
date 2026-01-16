@@ -75,6 +75,7 @@ def _episode_to_dict(episode: Episode) -> dict[str, Any]:
         "source_url": episode.source_url,
         "categories": episode.categories,
         "braggoscope_url": episode.braggoscope_url,
+        "reading_list": episode.reading_list,
     }
 
 

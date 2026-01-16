@@ -37,6 +37,17 @@
     </div>
     {% endif %}
 
+    {% if episode.reading_list %}
+    <div style="margin-top: 15px;">
+        <strong>Reading List:</strong>
+        <ul>
+        {% for book in episode.reading_list %}
+            <li>{{ book }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
     <div style="margin-top: 20px;">
         <a href="{{ episode.source_url }}" target="_blank">Listen on BBC Sounds</a>
         {% if episode.braggoscope_url %}

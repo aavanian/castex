@@ -201,3 +201,38 @@ def test_search_substring_matching() -> None:
     results = index.search("istotle")
     assert len(results) == 1
     assert results[0].id == "aristotle-ethics"
+
+
+def test_search_by_reading_list() -> None:
+    """Test searching episodes by reading list content."""
+    episodes = [
+        Episode(
+            id="emily-dickinson",
+            title="Emily Dickinson",
+            broadcast_date=date(2017, 5, 4),
+            contributors=["Fiona Green"],
+            description="American poet",
+            source_url="https://example.com/1",
+            categories=["Literature"],
+            braggoscope_url=None,
+            reading_list=[
+                "Christopher Benfey, A Summer of Hummingbirds (Penguin Books, 2009)",
+            ],
+        ),
+        Episode(
+            id="other-episode",
+            title="Other Episode",
+            broadcast_date=date(2020, 1, 1),
+            contributors=[],
+            description="Unrelated",
+            source_url="https://example.com/2",
+            categories=["History"],
+            braggoscope_url=None,
+        ),
+    ]
+
+    index = SearchIndex(episodes)
+    results = index.search("Hummingbirds")
+
+    assert len(results) == 1
+    assert results[0].id == "emily-dickinson"

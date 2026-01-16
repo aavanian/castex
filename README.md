@@ -51,7 +51,6 @@ Environment variables:
   * Tooling to benchmark models for classification
   * Script to only update classification without fetching episode info again
   * Contributor pivot (click contributor to see all their episodes)
-  * Reading list extraction from BBC
   * Multiple podcast sources
   * Semantic/embedding search
   * clickable tags

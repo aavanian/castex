@@ -39,6 +39,7 @@ def _episode_to_dict(episode: Episode) -> dict[str, Any]:
         "source_url": episode.source_url,
         "categories": episode.categories,
         "braggoscope_url": episode.braggoscope_url,
+        "reading_list": episode.reading_list,
     }
 
 
@@ -53,4 +54,5 @@ def _dict_to_episode(data: dict[str, Any]) -> Episode:
         source_url=data["source_url"],
         categories=data["categories"],
         braggoscope_url=data["braggoscope_url"],
+        reading_list=data.get("reading_list", []),
     )

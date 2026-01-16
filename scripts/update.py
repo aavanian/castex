@@ -36,15 +36,21 @@ async def fetch_wikipedia(client: httpx.AsyncClient) -> str:
     return response.text
 
 
-async def fetch_bbc_description(client: httpx.AsyncClient, url: str) -> str | None:
-    """Fetch episode description from BBC page."""
+async def fetch_bbc_data(client: httpx.AsyncClient, url: str) -> tuple[str | None, list[str]]:
+    """Fetch episode data from BBC page.
+
+    Returns a tuple of (description, reading_list).
+    """
     try:
         response = await client.get(url)
         response.raise_for_status()
-        return parse_bbc_html(response.text)
+        result = parse_bbc_html(response.text)
+        description = result.get("description") or result.get("short_description")
+        reading_list = result.get("reading_list", [])
+        return description, reading_list
     except httpx.HTTPError as e:
         logger.warning("Failed to fetch BBC page %s: %s", url, e)
-        return None
+        return None, []
 
 
 async def process_new_episode(
@@ -57,8 +63,8 @@ async def process_new_episode(
     source_url = str(episode_data["source_url"])
     logger.info("Processing: %s", title)
 
-    # Fetch description from BBC
-    description = await fetch_bbc_description(client, source_url)
+    # Fetch description and reading list from BBC
+    description, reading_list = await fetch_bbc_data(client, source_url)
 
     # Classify with LLM
     contributors = episode_data.get("contributors", [])
@@ -94,6 +100,7 @@ async def process_new_episode(
         source_url=source_url,
         categories=categories,
         braggoscope_url=braggoscope_url,
+        reading_list=reading_list,
     )
 
 

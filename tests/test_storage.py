@@ -53,3 +53,31 @@ def test_load_episodes_empty_directory(tmp_path: Path) -> None:
     loaded = load_episodes(data_dir)
 
     assert loaded == []
+
+
+def test_save_and_load_reading_list(tmp_path: Path) -> None:
+    """Test that reading_list is saved and loaded correctly."""
+    reading_list = [
+        "Christopher Benfey, A Summer of Hummingbirds (Penguin Books, 2009)",
+        "Judith Farr, The Gardens of Emily Dickinson (Harvard University Press, 2005)",
+    ]
+    episode = Episode(
+        id="emily-dickinson",
+        title="Emily Dickinson",
+        broadcast_date=date(2017, 5, 4),
+        contributors=["Fiona Green"],
+        description="A poet.",
+        source_url="https://www.bbc.co.uk/programmes/b08p3jlw",
+        categories=["Literature"],
+        braggoscope_url=None,
+        reading_list=reading_list,
+    )
+
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+
+    save_episodes([episode], data_dir)
+    loaded = load_episodes(data_dir)
+
+    assert len(loaded) == 1
+    assert loaded[0].reading_list == reading_list
