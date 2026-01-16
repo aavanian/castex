@@ -5,11 +5,13 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from castex.classifier import classify_episode
+from castex.config import Settings
 
 
 @pytest.mark.asyncio
 async def test_classify_episode() -> None:
     """Test classifying an episode with mocked LLM response."""
+    settings = Settings()
     mock_response = MagicMock()
     mock_response.choices = [MagicMock()]
     mock_response.choices[0].message.content = '["History", "Medieval", "Mediterranean"]'
@@ -22,9 +24,9 @@ async def test_classify_episode() -> None:
             title="The Siege of Malta, 1565",
             description="Discussion about the Ottoman siege of Malta.",
             contributors=["Prof. A (Oxford)", "Dr. B (Cambridge)"],
-            base_url="http://localhost:11434/v1",
-            api_key="",
-            model="llama3.2",
+            base_url=settings.llm_base_url,
+            api_key=settings.llm_api_key,
+            model=settings.llm_model,
         )
 
     assert categories == ["History", "Medieval", "Mediterranean"]
@@ -33,6 +35,7 @@ async def test_classify_episode() -> None:
 @pytest.mark.asyncio
 async def test_classify_episode_invalid_json() -> None:
     """Test handling of invalid JSON response from LLM."""
+    settings = Settings()
     mock_response = MagicMock()
     mock_response.choices = [MagicMock()]
     mock_response.choices[0].message.content = "not valid json"
@@ -45,9 +48,9 @@ async def test_classify_episode_invalid_json() -> None:
             title="Test Episode",
             description="Test description",
             contributors=[],
-            base_url="http://localhost:11434/v1",
-            api_key="",
-            model="llama3.2",
+            base_url=settings.llm_base_url,
+            api_key=settings.llm_api_key,
+            model=settings.llm_model,
         )
 
     assert categories == []
@@ -56,6 +59,7 @@ async def test_classify_episode_invalid_json() -> None:
 @pytest.mark.asyncio
 async def test_classify_episode_no_description() -> None:
     """Test classifying episode with no description."""
+    settings = Settings()
     mock_response = MagicMock()
     mock_response.choices = [MagicMock()]
     mock_response.choices[0].message.content = '["Philosophy", "Ancient"]'
@@ -68,9 +72,9 @@ async def test_classify_episode_no_description() -> None:
             title="Plato's Republic",
             description=None,
             contributors=["Prof. X"],
-            base_url="http://localhost:11434/v1",
-            api_key="",
-            model="llama3.2",
+            base_url=settings.llm_base_url,
+            api_key=settings.llm_api_key,
+            model=settings.llm_model,
         )
 
     assert categories == ["Philosophy", "Ancient"]
@@ -81,8 +85,6 @@ async def test_classify_episode_no_description() -> None:
 async def test_classify_episode_integration() -> None:
     """Integration test that calls a real LLM using configured settings."""
     import httpx
-
-    from castex.config import Settings
 
     settings = Settings()
 

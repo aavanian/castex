@@ -4,19 +4,27 @@ from pathlib import Path
 
 import pytest
 
-from castex.config import Settings
+from castex.config import (
+    DEFAULT_DATA_DIR,
+    DEFAULT_LLM_API_KEY,
+    DEFAULT_LLM_BASE_URL,
+    DEFAULT_LLM_MODEL,
+    DEFAULT_SERVER_HOST,
+    DEFAULT_SERVER_PORT,
+    Settings,
+)
 
 
 def test_settings_defaults() -> None:
     """Test that Settings has correct default values."""
     settings = Settings()
 
-    assert settings.data_dir == Path("./data")
-    assert settings.llm_base_url == "http://localhost:11434/v1"
-    assert settings.llm_api_key == ""
-    assert settings.llm_model == "llama3.2"
-    assert settings.server_host == "0.0.0.0"
-    assert settings.server_port == 8000
+    assert settings.data_dir == Path(DEFAULT_DATA_DIR)
+    assert settings.llm_base_url == DEFAULT_LLM_BASE_URL
+    assert settings.llm_api_key == DEFAULT_LLM_API_KEY
+    assert settings.llm_model == DEFAULT_LLM_MODEL
+    assert settings.server_host == DEFAULT_SERVER_HOST
+    assert settings.server_port == DEFAULT_SERVER_PORT
 
 
 def test_settings_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:
