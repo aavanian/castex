@@ -15,6 +15,7 @@ def sample_episodes() -> list[Episode]:
     """Create sample episodes for testing."""
     return [
         Episode(
+            podcast_id="in_our_time",
             id="siege-malta",
             title="The Siege of Malta",
             broadcast_date=date(2020, 1, 15),
@@ -25,6 +26,7 @@ def sample_episodes() -> list[Episode]:
             braggoscope_url="https://www.braggoscope.com/2020/01/15/siege-malta.html",
         ),
         Episode(
+            podcast_id="in_our_time",
             id="plato-republic",
             title="Plato's Republic",
             broadcast_date=date(2020, 2, 20),
@@ -105,6 +107,7 @@ def test_search_api_includes_reading_list(tmp_path: Path) -> None:
 
     episodes = [
         Episode(
+            podcast_id="in_our_time",
             id="emily-dickinson",
             title="Emily Dickinson",
             broadcast_date=date(2017, 5, 4),

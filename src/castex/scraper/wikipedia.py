@@ -1,4 +1,12 @@
-"""Parse episode list from Wikipedia."""
+"""Parse episode list from Wikipedia.
+
+DEPRECATED: This module is deprecated in favor of the RSS-first architecture.
+The BBC RSS feed contains the complete episode history, making Wikipedia
+scraping unnecessary. This module is kept for backward compatibility but
+will be removed in a future version.
+
+Use castex.podcasts.in_our_time.feed.InOurTimeFeedProvider instead.
+"""
 
 import re
 from datetime import date

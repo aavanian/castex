@@ -1,4 +1,9 @@
-"""Read/write episode data to JSON files."""
+"""Read/write episode data to JSON files.
+
+DEPRECATED: This module is deprecated in favor of SQLite storage.
+Use castex.db.Database instead for new code. This module is kept
+for backward compatibility during the transition period.
+"""
 
 import json
 from datetime import date
@@ -32,6 +37,7 @@ def _episode_to_dict(episode: Episode) -> dict[str, Any]:
     """Convert an Episode to a dictionary for JSON serialization."""
     return {
         "id": episode.id,
+        "podcast_id": episode.podcast_id,
         "title": episode.title,
         "broadcast_date": episode.broadcast_date.isoformat(),
         "contributors": episode.contributors,
@@ -47,6 +53,7 @@ def _dict_to_episode(data: dict[str, Any]) -> Episode:
     """Convert a dictionary from JSON to an Episode."""
     return Episode(
         id=data["id"],
+        podcast_id=data.get("podcast_id", "in_our_time"),
         title=data["title"],
         broadcast_date=date.fromisoformat(data["broadcast_date"]),
         contributors=data["contributors"],

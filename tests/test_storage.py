@@ -11,6 +11,7 @@ def test_save_and_load_episodes(tmp_path: Path) -> None:
     """Test saving and loading episodes to/from JSON."""
     episodes = [
         Episode(
+            podcast_id="in_our_time",
             id="episode-one",
             title="Episode One",
             broadcast_date=date(2020, 1, 15),
@@ -21,6 +22,7 @@ def test_save_and_load_episodes(tmp_path: Path) -> None:
             braggoscope_url=None,
         ),
         Episode(
+            podcast_id="in_our_time",
             id="episode-two",
             title="Episode Two",
             broadcast_date=date(2020, 2, 20),
@@ -62,6 +64,7 @@ def test_save_and_load_reading_list(tmp_path: Path) -> None:
         "Judith Farr, The Gardens of Emily Dickinson (Harvard University Press, 2005)",
     ]
     episode = Episode(
+        podcast_id="in_our_time",
         id="emily-dickinson",
         title="Emily Dickinson",
         broadcast_date=date(2017, 5, 4),
