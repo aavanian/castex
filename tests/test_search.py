@@ -152,3 +152,52 @@ def test_search_no_results() -> None:
     results = index.search("nonexistent")
 
     assert results == []
+
+
+def test_search_substring_matching() -> None:
+    """Test that partial word search finds matching episodes."""
+    episodes = [
+        Episode(
+            id="aristotle-ethics",
+            title="Aristotle's Nicomachean Ethics",
+            broadcast_date=date(2020, 1, 1),
+            contributors=["Prof. A"],
+            description="Greek philosophy",
+            source_url="https://example.com/1",
+            categories=["Philosophy"],
+            braggoscope_url=None,
+        ),
+        Episode(
+            id="aristocracy",
+            title="The Rise of Aristocracy",
+            broadcast_date=date(2020, 2, 1),
+            contributors=["Dr. B"],
+            description="Social classes",
+            source_url="https://example.com/2",
+            categories=["History"],
+            braggoscope_url=None,
+        ),
+        Episode(
+            id="unrelated",
+            title="Quantum Physics",
+            broadcast_date=date(2020, 3, 1),
+            contributors=[],
+            description="Science topic",
+            source_url="https://example.com/3",
+            categories=["Science"],
+            braggoscope_url=None,
+        ),
+    ]
+
+    index = SearchIndex(episodes)
+
+    # Prefix search: "aristo" should find both aristotle and aristocracy
+    results = index.search("aristo")
+    assert len(results) == 2
+    result_ids = {r.id for r in results}
+    assert result_ids == {"aristotle-ethics", "aristocracy"}
+
+    # Infix search: "istotle" should find aristotle
+    results = index.search("istotle")
+    assert len(results) == 1
+    assert results[0].id == "aristotle-ethics"

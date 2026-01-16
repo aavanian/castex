@@ -13,7 +13,7 @@ def test_parse_wikipedia_html(fixtures_dir: Path) -> None:
 
     episodes = parse_wikipedia_html(html)
 
-    assert len(episodes) == 3
+    assert len(episodes) == 4
 
     # Check first episode
     ep1 = episodes[0]

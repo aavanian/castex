@@ -22,7 +22,7 @@ def sample_episodes() -> list[Episode]:
             description="A discussion about the Ottoman siege.",
             source_url="https://www.bbc.co.uk/programmes/test1",
             categories=["History", "Medieval", "Mediterranean"],
-            braggoscope_url="https://braggoscope.com/siege-malta",
+            braggoscope_url="https://www.braggoscope.com/2020/01/15/siege-malta.html",
         ),
         Episode(
             id="plato-republic",

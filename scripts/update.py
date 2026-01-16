@@ -13,7 +13,7 @@ import httpx
 
 from castex.classifier import classify_episode
 from castex.config import Settings
-from castex.models import Episode, make_episode_id
+from castex.models import Episode, make_braggoscope_url, make_episode_id
 from castex.scraper.bbc import parse_bbc_html
 from castex.scraper.wikipedia import parse_wikipedia_html
 from castex.storage import load_episodes, save_episodes
@@ -75,15 +75,15 @@ async def process_new_episode(
         model=settings.llm_model,
     )
 
-    # Generate braggoscope URL
-    episode_id = make_episode_id(title)
-    braggoscope_url = f"https://www.braggoscope.com/episode/{episode_id}"
-
     from datetime import date
 
     broadcast_date = episode_data.get("broadcast_date")
     if not isinstance(broadcast_date, date):
         broadcast_date = date.today()
+
+    # Generate braggoscope URL with date path
+    episode_id = make_episode_id(title)
+    braggoscope_url = make_braggoscope_url(episode_id, broadcast_date)
 
     return Episode(
         id=episode_id,

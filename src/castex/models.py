@@ -15,6 +15,14 @@ def make_episode_id(title: str) -> str:
     return slug
 
 
+def make_braggoscope_url(slug: str, broadcast_date: date) -> str:
+    """Create a braggoscope URL from slug and broadcast date.
+
+    Format: https://www.braggoscope.com/YYYY/MM/DD/{slug}.html
+    """
+    return f"https://www.braggoscope.com/{broadcast_date:%Y/%m/%d}/{slug}.html"
+
+
 @dataclass
 class Episode:
     """Represents a single In Our Time episode."""

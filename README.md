@@ -43,13 +43,10 @@ Environment variables:
 
 ## Bugs
   
-  * braggoscope urls are broken, they need the date: https://www.braggoscope.com/2011/01/27/$slug.html
-  * partial word search doesn't work (artisto has no results, artistotle has several)
   * contributor formatting is wrong
 
 ## Todos
 
-  * show the full description
   * Styling
   * Rich search: using +/- to include/exclude tags, use =/!= to include/exclude sources (recheck elfeed mini dsl to use the same)
   * Real-time search

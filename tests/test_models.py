@@ -2,7 +2,7 @@
 
 from datetime import date
 
-from castex.models import Episode, make_episode_id
+from castex.models import Episode, make_braggoscope_url, make_episode_id
 
 
 def test_episode_creation() -> None:
@@ -15,7 +15,7 @@ def test_episode_creation() -> None:
         description="A discussion about the siege of Malta.",
         source_url="https://www.bbc.co.uk/programmes/b0xyz123",
         categories=["History", "Military", "Medieval", "Mediterranean"],
-        braggoscope_url="https://www.braggoscope.com/episode/the-siege-of-malta-1565",
+        braggoscope_url="https://www.braggoscope.com/2017/09/21/the-siege-of-malta-1565.html",
     )
 
     assert episode.id == "the-siege-of-malta-1565"
@@ -25,7 +25,10 @@ def test_episode_creation() -> None:
     assert episode.description == "A discussion about the siege of Malta."
     assert episode.source_url == "https://www.bbc.co.uk/programmes/b0xyz123"
     assert episode.categories == ["History", "Military", "Medieval", "Mediterranean"]
-    assert episode.braggoscope_url == "https://www.braggoscope.com/episode/the-siege-of-malta-1565"
+    assert (
+        episode.braggoscope_url
+        == "https://www.braggoscope.com/2017/09/21/the-siege-of-malta-1565.html"
+    )
 
 
 def test_episode_with_optional_fields_none() -> None:
@@ -63,3 +66,15 @@ def test_make_episode_id_special_chars() -> None:
 def test_make_episode_id_multiple_spaces() -> None:
     """Test slug generation with multiple spaces."""
     assert make_episode_id("The   Great    Fire") == "the-great-fire"
+
+
+def test_make_braggoscope_url() -> None:
+    """Test braggoscope URL generation with date path."""
+    url = make_braggoscope_url("the-siege-of-malta-1565", date(2017, 9, 21))
+    assert url == "https://www.braggoscope.com/2017/09/21/the-siege-of-malta-1565.html"
+
+
+def test_make_braggoscope_url_single_digit_date() -> None:
+    """Test braggoscope URL with single-digit month and day are zero-padded."""
+    url = make_braggoscope_url("platos-symposium", date(2005, 1, 6))
+    assert url == "https://www.braggoscope.com/2005/01/06/platos-symposium.html"

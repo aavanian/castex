@@ -27,7 +27,7 @@ class SearchIndex:
                 description,
                 contributors,
                 categories,
-                tokenize='porter unicode61'
+                tokenize='trigram'
             )
         """)
 
