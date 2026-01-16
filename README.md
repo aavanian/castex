@@ -54,3 +54,8 @@ Environment variables:
   * Multiple podcast sources
   * Semantic/embedding search
   * clickable tags
+  * Instead of wikipedia, get the RSS feed (which is complete). And once done that:
+    * we should archive the rss feed (in case they decide to truncate it)
+    * considering other podcasts where a full rss feed might not exist, should we rebuild one? (bootstrapped by a one-time parse of the website)
+    * then once doing that, should we enrich the rss feed with extra info and use that rather than json? or bootstrap json from our custom rss feeds
+    
