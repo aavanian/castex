@@ -3,7 +3,7 @@
 from datetime import date
 from pathlib import Path
 
-from castex.scraper.bbc import parse_bbc_html
+from castex.scraper.bbc import parse_bbc_html, parse_rss_description_html
 from castex.scraper.wikipedia import parse_wikipedia_html
 
 
@@ -116,3 +116,62 @@ def test_parse_bbc_html_new_format(fixtures_dir: Path) -> None:
         "Christopher Benfey, A Summer of Hummingbirds (Penguin Books, 2009)",
         "Judith Farr, The Gardens of Emily Dickinson (Harvard University Press, 2005)",
     ]
+
+
+def test_parse_rss_description_html_new_format() -> None:
+    """Test parsing RSS description HTML with structured paragraphs."""
+    html = """
+    <p>Melvyn Bragg discusses Emily Dickinson.</p>
+    <p>With </p>
+    <p>Fiona Green Senior Lecturer at Cambridge</p>
+    <p>and</p>
+    <p>Linda Freedman Lecturer at UCL</p>
+    <p>Reading list:</p>
+    <p>A Summer of Hummingbirds (Penguin, 2009)</p>
+    """
+
+    result = parse_rss_description_html(html)
+
+    assert result["description"] == "Melvyn Bragg discusses Emily Dickinson."
+    assert result["contributors"] == [
+        "Fiona Green Senior Lecturer at Cambridge",
+        "Linda Freedman Lecturer at UCL",
+    ]
+    assert result["reading_list"] == ["A Summer of Hummingbirds (Penguin, 2009)"]
+
+
+def test_parse_rss_description_html_old_format() -> None:
+    """Test parsing RSS description HTML with old flat format."""
+    html = """
+    <p>Melvyn Bragg discusses the philosophy of mind.
+    With John Smith, Professor at Oxford; Jane Doe, Reader at Cambridge.</p>
+    """
+
+    result = parse_rss_description_html(html)
+
+    assert result["description"] == "Melvyn Bragg discusses the philosophy of mind."
+    assert result["contributors"] == [
+        "John Smith, Professor at Oxford",
+        "Jane Doe, Reader at Cambridge",
+    ]
+    assert result["reading_list"] == []
+
+
+def test_parse_rss_description_html_plain_text() -> None:
+    """Test parsing RSS description HTML that is just plain text without p tags."""
+    html = "Simple episode description without any HTML tags."
+
+    result = parse_rss_description_html(html)
+
+    assert result["description"] == "Simple episode description without any HTML tags."
+    assert result["contributors"] == []
+    assert result["reading_list"] == []
+
+
+def test_parse_rss_description_html_empty() -> None:
+    """Test parsing empty RSS description."""
+    result = parse_rss_description_html("")
+
+    assert result["description"] == ""
+    assert result["contributors"] == []
+    assert result["reading_list"] == []

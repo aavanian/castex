@@ -20,6 +20,7 @@ from castex.config import Settings
 from castex.db import Database
 from castex.models import Episode, FeedItem, make_braggoscope_url, make_episode_id
 from castex.podcasts.registry import get_enricher, list_podcasts
+from castex.scraper.bbc import parse_rss_description_html
 
 logging.basicConfig(
     level=logging.INFO,
@@ -60,17 +61,24 @@ async def process_episode(
     """Process a single feed item into an Episode."""
     logger.info("Processing: %s", item.title)
 
+    # Parse RSS description HTML for structured data first
+    rss_parsed = parse_rss_description_html(item.description or "")
     enriched: dict[str, Any] = {
-        "description": item.description,
-        "contributors": [],
-        "reading_list": [],
+        "description": rss_parsed.get("description"),
+        "contributors": rss_parsed.get("contributors", []),
+        "reading_list": rss_parsed.get("reading_list", []),
     }
-    enricher = get_enricher(podcast_id)
-    if enricher:
-        try:
-            enriched = await enricher.enrich(item)
-        except Exception as e:
-            logger.warning("Failed to enrich %s: %s", item.title, e)
+
+    # Only enrich from BBC page if we didn't get contributors from RSS
+    if not enriched["contributors"]:
+        enricher = get_enricher(podcast_id)
+        if enricher:
+            try:
+                bbc_enriched = await enricher.enrich(item)
+                if bbc_enriched.get("contributors"):
+                    enriched = bbc_enriched
+            except Exception as e:
+                logger.warning("Failed to enrich %s: %s", item.title, e)
 
     description = enriched.get("description") or item.description
     contributors = enriched.get("contributors", [])
