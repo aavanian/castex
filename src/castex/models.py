@@ -24,10 +24,22 @@ def make_braggoscope_url(slug: str, broadcast_date: date) -> str:
 
 
 @dataclass
+class FeedItem:
+    """Intermediate representation of an episode from an RSS feed."""
+
+    guid: str
+    title: str
+    published: date
+    link: str
+    description: str | None
+
+
+@dataclass
 class Episode:
-    """Represents a single In Our Time episode."""
+    """Represents a single podcast episode."""
 
     id: str
+    podcast_id: str
     title: str
     broadcast_date: date
     contributors: list[str]

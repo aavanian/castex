@@ -44,3 +44,17 @@ def test_settings_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.llm_model == "gpt-4"
     assert settings.server_host == "127.0.0.1"
     assert settings.server_port == 3000
+
+
+def test_settings_derived_paths() -> None:
+    """Test that derived path methods work correctly."""
+    settings = Settings()
+
+    assert settings.db_path == Path(DEFAULT_DATA_DIR) / "episodes.db"
+    assert (
+        settings.feed_json_path("in_our_time") == Path(DEFAULT_DATA_DIR) / "in_our_time_feed.json"
+    )
+    assert (
+        settings.historic_feed_json_path("in_our_time")
+        == Path(DEFAULT_DATA_DIR) / "in_our_time_historic_feed.json"
+    )

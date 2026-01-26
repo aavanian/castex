@@ -2,13 +2,14 @@
 
 from datetime import date
 
-from castex.models import Episode, make_braggoscope_url, make_episode_id
+from castex.models import Episode, FeedItem, make_braggoscope_url, make_episode_id
 
 
 def test_episode_creation() -> None:
     """Test that Episode can be created with valid data."""
     episode = Episode(
         id="the-siege-of-malta-1565",
+        podcast_id="in_our_time",
         title="The Siege of Malta, 1565",
         broadcast_date=date(2017, 9, 21),
         contributors=["Anne Smith (Oxford)", "John Doe (Cambridge)"],
@@ -19,6 +20,7 @@ def test_episode_creation() -> None:
     )
 
     assert episode.id == "the-siege-of-malta-1565"
+    assert episode.podcast_id == "in_our_time"
     assert episode.title == "The Siege of Malta, 1565"
     assert episode.broadcast_date == date(2017, 9, 21)
     assert episode.contributors == ["Anne Smith (Oxford)", "John Doe (Cambridge)"]
@@ -35,6 +37,7 @@ def test_episode_with_optional_fields_none() -> None:
     """Test Episode with optional fields set to None."""
     episode = Episode(
         id="plato-symposium",
+        podcast_id="in_our_time",
         title="Plato's Symposium",
         broadcast_date=date(2005, 1, 6),
         contributors=["Professor A", "Professor B"],
@@ -88,6 +91,7 @@ def test_episode_with_reading_list() -> None:
     ]
     episode = Episode(
         id="emily-dickinson",
+        podcast_id="in_our_time",
         title="Emily Dickinson",
         broadcast_date=date(2017, 5, 4),
         contributors=["Fiona Green", "Linda Freedman"],
@@ -99,3 +103,50 @@ def test_episode_with_reading_list() -> None:
     )
 
     assert episode.reading_list == reading_list
+
+
+def test_feed_item_creation() -> None:
+    """Test that FeedItem can be created with valid data."""
+    item = FeedItem(
+        guid="urn:bbc:podcast:b0xyz123",
+        title="The Siege of Malta, 1565",
+        published=date(2017, 9, 21),
+        link="https://www.bbc.co.uk/programmes/b0xyz123",
+        description="A discussion about the siege of Malta.",
+    )
+
+    assert item.guid == "urn:bbc:podcast:b0xyz123"
+    assert item.title == "The Siege of Malta, 1565"
+    assert item.published == date(2017, 9, 21)
+    assert item.link == "https://www.bbc.co.uk/programmes/b0xyz123"
+    assert item.description == "A discussion about the siege of Malta."
+
+
+def test_feed_item_with_none_description() -> None:
+    """Test FeedItem with optional description set to None."""
+    item = FeedItem(
+        guid="urn:bbc:podcast:b0abc123",
+        title="Plato's Symposium",
+        published=date(2005, 1, 6),
+        link="https://www.bbc.co.uk/programmes/b0abc123",
+        description=None,
+    )
+
+    assert item.description is None
+
+
+def test_episode_with_podcast_id() -> None:
+    """Test Episode with podcast_id field."""
+    episode = Episode(
+        id="the-siege-of-malta-1565",
+        podcast_id="in_our_time",
+        title="The Siege of Malta, 1565",
+        broadcast_date=date(2017, 9, 21),
+        contributors=["Anne Smith (Oxford)"],
+        description="A discussion about the siege of Malta.",
+        source_url="https://www.bbc.co.uk/programmes/b0xyz123",
+        categories=["History", "Military"],
+        braggoscope_url=None,
+    )
+
+    assert episode.podcast_id == "in_our_time"

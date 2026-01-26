@@ -32,3 +32,16 @@ class Settings:
         self.llm_model = os.environ.get("CASTEX_LLM_MODEL", DEFAULT_LLM_MODEL)
         self.server_host = os.environ.get("CASTEX_SERVER_HOST", DEFAULT_SERVER_HOST)
         self.server_port = int(os.environ.get("CASTEX_SERVER_PORT", str(DEFAULT_SERVER_PORT)))
+
+    @property
+    def db_path(self) -> Path:
+        """Path to the SQLite database."""
+        return self.data_dir / "episodes.db"
+
+    def feed_json_path(self, podcast_id: str) -> Path:
+        """Path to the feed JSON file for a podcast."""
+        return self.data_dir / f"{podcast_id}_feed.json"
+
+    def historic_feed_json_path(self, podcast_id: str) -> Path:
+        """Path to the historic feed JSON backup for a podcast."""
+        return self.data_dir / f"{podcast_id}_historic_feed.json"

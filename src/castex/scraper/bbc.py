@@ -50,6 +50,30 @@ def parse_bbc_html(html: str) -> BBCEpisodeData:
     return result
 
 
+def parse_rss_description_html(html: str) -> BBCEpisodeData:
+    """Parse episode data from RSS feed description HTML.
+
+    The RSS description contains HTML with <p> tags in the same format
+    as the BBC page synopsis, so we can reuse the parsing logic.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+
+    # Get all <p> tags directly (RSS description is just <p> tags, no wrapper div)
+    paragraphs = soup.find_all("p")
+    if not paragraphs:
+        # No <p> tags, treat as plain text
+        text = soup.get_text(strip=True)
+        return {"description": text, "contributors": [], "reading_list": []}
+
+    p_texts = [p.get_text(separator=" ", strip=True) for p in paragraphs]
+
+    # Detect format and parse (reuse existing logic)
+    if len(p_texts) > 1 and p_texts[1].strip().lower() == "with":
+        return _parse_new_format(p_texts)
+    else:
+        return _parse_old_format(p_texts)
+
+
 def _get_meta_description(soup: BeautifulSoup) -> str | None:
     """Get description from meta tags."""
     meta = soup.find("meta", attrs={"name": "description"})

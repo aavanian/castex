@@ -1,10 +1,32 @@
 """Full-text search using SQLite FTS5."""
 
 import sqlite3
+from pathlib import Path
 
+from castex.db import Database
 from castex.models import Episode
 
 MAX_RESULTS = 50
+
+
+class DatabaseSearchIndex:
+    """Search index backed by the SQLite database."""
+
+    def __init__(self, db_path: Path) -> None:
+        """Create a search index from the database."""
+        self._db = Database(db_path)
+
+    def search(self, query: str) -> list[Episode]:
+        """Search for episodes matching the query."""
+        return self._db.search(query)
+
+    def get_all_episodes(self) -> list[Episode]:
+        """Get all episodes from the database."""
+        return self._db.get_all_episodes()
+
+    def get_episode(self, episode_id: str) -> Episode | None:
+        """Get an episode by ID."""
+        return self._db.get_episode(episode_id)
 
 
 class SearchIndex:
