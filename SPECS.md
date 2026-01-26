@@ -2,25 +2,33 @@
 
 ## Project Overview
 
-Build a searchable archive for podcasts like BBC Radio 4's "In Our Time". The system scrapes episode metadata from Wikipedia and BBC, classifies episodes using an LLM, and provides both a web interface and JSON API for search.
+Build a searchable archive for podcasts like BBC Radio 4's "In Our Time". The system fetches episode metadata from RSS feeds, enriches it with data from source pages, classifies episodes using an LLM, and provides both a web interface and JSON API for search.
 
-Additional podcasts will be added on a ad-hoc basis.
+Additional podcasts can be added via the provider architecture.
 
 ## Architecture
 
 ```
 ┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
-│   Wikipedia     │────▶│   JSON files    │────▶│   FastAPI       │
-│   (episode      │      │   (episodes.json│      │   server        │
-│    list)        │      │    + index)     │      │                 │
+│   RSS Feed      │────▶│   JSON files    │────▶│   FastAPI       │
+│   (episode      │      │   (per podcast) │      │   server        │
+│    list)        │      │                 │      │                 │
 └─────────────────┘      └─────────────────┘      └─────────────────┘
         │                        ▲                    │
-        │ (new only)              │                    ├── GET / (search form)
-        ▼                        │                    ├── GET /search (HTML)
-┌─────────────────┐      ┌──-─────┴───────┐            ├── GET /api/search (JSON)
-│   BBC episode   │────▶│ LLM classifier │            └── GET /episode/{id}
-│   pages         │      │ (categories)   │
-└─────────────────┘      └───-────────────┘
+        │ parse HTML             │                    ├── GET / (search form)
+        ▼ description            │                    ├── GET /search (HTML)
+┌─────────────────┐      ┌───────┴───────┐            ├── GET /api/search (JSON)
+│  RSS description│────▶│ LLM classifier │            └── GET /episode/{id}
+│  (contributors, │      │ (categories)   │
+│   reading list) │      └────────────────┘
+└─────────────────┘
+        │
+        │ fallback only
+        ▼
+┌─────────────────┐
+│   Source page   │
+│   (BBC, etc.)   │
+└─────────────────┘
 ```
 
 ## Tech Stack
@@ -40,13 +48,15 @@ Additional podcasts will be added on a ad-hoc basis.
 @dataclass
 class Episode:
     id: str                      # Slug from title, e.g. "the-siege-of-malta-1565"
+    podcast_id: str              # "in_our_time"
     title: str                   # "The Siege of Malta, 1565"
     broadcast_date: date         # 2017-09-21
     contributors: list[str]      # ["Anne Smith (Oxford)", "John Doe (Cambridge)"]
-    description: str | None      # Synopsis from BBC page
-    source_url: str                 # https://www.bbc.co.uk/programmes/b0xyz123
+    description: str | None      # Synopsis from RSS or source page
+    source_url: str              # https://www.bbc.co.uk/programmes/b0xyz123
     categories: list[str]        # ["History", "Military", "Medieval", "Mediterranean"]
     braggoscope_url: str | None  # https://www.braggoscope.com/episode/...
+    reading_list: list[str]      # ["Book Title (Publisher, Year)", ...]
 ```
 
 ## Category Taxonomy
@@ -74,10 +84,18 @@ castex/
 │       ├── models.py          # Episode dataclass, type definitions
 │       ├── scraper/
 │       │   ├── __init__.py
-│       │   ├── wikipedia.py   # Parse episode list from Wikipedia
-│       │   └── bbc.py         # Fetch episode description from BBC
+│       │   └── bbc.py         # Parse BBC page/RSS description HTML
+│       ├── podcasts/
+│       │   ├── __init__.py
+│       │   ├── base.py        # Protocol definitions
+│       │   ├── registry.py    # Provider registry
+│       │   └── in_our_time/   # Example podcast implementation
+│       │       ├── __init__.py
+│       │       ├── feed.py    # RSS feed parser
+│       │       └── enricher.py # BBC page enricher
 │       ├── classifier.py      # LLM classification
-│       ├── search.py          # Search logic (load JSON → SQLite in-memory → query)
+│       ├── search.py          # Search logic
+│       ├── db.py              # SQLite database operations
 │       ├── storage.py         # Read/write JSON files
 │       ├── server.py          # FastAPI app
 │       └── templates/
@@ -86,18 +104,20 @@ castex/
 │           ├── results.html   # Search results
 │           └── episode.html   # Episode detail page
 ├── data/
-│   └── episodes.json          # Persisted episode data
+│   ├── in_our_time.json       # Cached RSS feed items
+│   └── episodes.db            # SQLite database
 ├── tests/
 │   ├── conftest.py            # Fixtures
 │   ├── fixtures/
-│   │   ├── wikipedia_sample.html
-│   │   └── bbc_episode_sample.html
+│   │   ├── bbc_episode_sample.html
+│   │   └── bbc_episode_new_format.html
 │   ├── test_scraper.py
 │   ├── test_classifier.py
 │   ├── test_search.py
 │   └── test_server.py
 └── scripts/
-    └── update.py              # Entry point for cron job
+    ├── fetch_feed.py          # Fetch and cache RSS feed
+    └── update_db.py           # Process feed items into database
 ```
 
 ## Configuration
@@ -114,22 +134,61 @@ CASTEX_SERVER_PORT=8000
 
 ## Key Implementation Details
 
-### Scraper: Wikipedia
+### RSS-First Architecture
 
-Source: `https://en.wikipedia.org/wiki/List_of_In_Our_Time_programmes`
+The primary data source is the podcast's RSS feed, which typically contains:
+- Episode title
+- Publication date
+- Link to source page
+- Description (often HTML with structured data)
 
-The page has tables organized by year. Each row contains:
-- Broadcast date (with link to BBC page embedded)
-- Title
-- Contributors with affiliations
+For many podcasts (like BBC's In Our Time), the RSS description HTML contains structured information including contributors and reading lists in `<p>` tags. The system parses this HTML directly, avoiding HTTP requests to source pages.
 
-Parse all tables, extract episode data, compare against existing `episodes.json` to find new episodes only.
+### Feed Provider Protocol
 
-### Scraper: BBC
+Each podcast implements the `FeedProvider` protocol:
 
-For each new episode, fetch the BBC page to extract:
+```python
+class FeedProvider(Protocol):
+    def fetch_current_feed(self) -> list[FeedItem]:
+        """Fetch and parse the current RSS feed."""
+        ...
+
+    def fetch_historic_feed(self) -> list[FeedItem]:
+        """One-time scrape for historic episodes not in RSS."""
+        ...
+
+    def is_feed_complete(self) -> bool:
+        """Check if RSS feed contains full history."""
+        ...
+```
+
+### Episode Enricher Protocol
+
+Optional enricher for additional metadata:
+
+```python
+class EpisodeEnricher(Protocol):
+    async def enrich(self, item: FeedItem) -> dict[str, Any]:
+        """Fetch additional data for an episode."""
+        ...
+```
+
+The enricher is only called as a fallback when RSS description parsing doesn't yield contributors.
+
+### Scraper: RSS Description
+
+The `parse_rss_description_html()` function extracts structured data from RSS description HTML:
+
+- **New format**: Multiple `<p>` tags with "With" separator, contributor paragraphs, "Reading list:" marker
+- **Old format**: Single paragraph with "With Name, Title; Name, Title." at end
+
+### Scraper: Source Page (Fallback)
+
+For episodes where RSS description parsing fails, fetch the source page to extract:
 - Description/synopsis
-- Construct braggoscope URL from episode slug
+- Contributors
+- Reading list
 
 Handle rate limiting gracefully (add delays between requests).
 
@@ -158,9 +217,9 @@ Use temperature=0 for consistency. Parse JSON from response, validate against kn
 
 On server startup:
 
-  1. Load `episodes.json`
-  2. Create in-memory SQLite database with FTS5 virtual table
-  3. Index title, description, contributors, categories
+  1. Load episodes from SQLite database
+  2. Use FTS5 virtual table for full-text search
+  3. Index title, description, contributors, categories, reading list
 
 Query logic:
 
@@ -176,30 +235,29 @@ Return results sorted by relevance (FTS rank), limited to 50.
   * `GET /api/search?q=...` - JSON results (same logic, different serialization)
   * `GET /episode/{id}` - Episode detail page
 
-Templates use minimal CSS (inline in base.html or single small file). No external dependencies. Progressive enhancement note: add TODO comment for future JS real-time search.
+Templates use minimal CSS (inline in base.html or single small file). No external dependencies.
 
-### Update Script
+### Update Workflow
 
-`scripts/update.py`:
+Two-step process:
 
-  1. Scrape Wikipedia for full episode list
-  2. Compare with stored episodes to find new ones
-  3. For each new episode:
-     * Fetch BBC page for description
-     * Classify with LLM
-     * Add to episodes list
-  4. Save updated episodes.json
+1. `scripts/fetch_feed.py`: Fetch RSS feed and save to JSON
+2. `scripts/update_db.py`: Process new feed items into database
+   - Parse RSS description HTML for contributors/reading list
+   - Fall back to source page enrichment if needed
+   - Classify with LLM
+   - Save to SQLite
 
-Idempotent and safe to run repeatedly.
+Both scripts are idempotent and safe to run repeatedly.
 
 ## Testing Requirements
 
 ### Unit Tests
 
   * `test_scraper.py`:
-    * Parse Wikipedia HTML fixture → list of episodes
-    * Parse BBC episode HTML fixture → description
-    * Handle malformed/missing data 
+    * Parse BBC episode HTML fixture → description, contributors, reading list
+    * Parse RSS description HTML → structured data
+    * Handle malformed/missing data
   * `test_classifier.py`:
     * Mock LLM response → parsed categories
     * Invalid JSON response → graceful fallback
@@ -229,20 +287,21 @@ uv run pytest
 # Run server locally
 uv run python -m castex.server
 
-# Run update (scrape new episodes)
-uv run python scripts/update.py
+# Fetch RSS feed
+uv run python scripts/fetch_feed.py
+
+# Update database with new episodes
+uv run python scripts/update_db.py
 ```
 
 ## Out of Scope for v1
 
   * JavaScript real-time search (TODO noted in templates)
   * Contributor pivot (click contributor to see all their episodes)
-  * Reading list extraction from BBC (link to Braggoscope instead)
-  * Multiple podcast sources (architecture supports it, not implemented)
   * Semantic/embedding search
 
 ## Notes
 
-  * Be defensive with external sources - Wikipedia and BBC page structure may change
+  * Be defensive with external sources - RSS and page structure may change
   * Add logging throughout for debugging scraper issues
   * Keep the codebase simple and readable over clever
