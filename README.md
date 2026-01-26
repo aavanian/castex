@@ -207,14 +207,11 @@ def test_parse_rss_xml(fixtures_dir):
     assert items[0].title == "Expected Title"
 ```
 
-## Todos
+## Ideas
 
-- Styling
-- Rich search: using +/- to include/exclude tags
-- Real-time search (JavaScript)
-- Tooling to benchmark models for classification
 - Script to only update classification without fetching episode info again
 - Contributor pivot (click contributor to see all their episodes)
-- Semantic/embedding search
+- Archive episodes: a quick way would be to link to IA/WBM if it exists. A stronger way would be to actually store the episode but that may raise some copyright/license issues.
+- If we store the full transcript of the episodes, we could add semantic/embedding search
 - Clickable tags
 - Archive/Regenerate full RSS feeds (in case providers truncate them)

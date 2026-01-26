@@ -1,0 +1,3 @@
+data/episodes.db
+data/*.json
+data/rss_raw/*.rss
